@@ -13,19 +13,33 @@
 	<version>0.0.1-SNAPSHOT</version>
 	<name>user-management-service</name>
 	<description>User Management microservice for IoT application</description>
-	<url/>
+	<url>https://github.com/doemefu/iotApp-automation</url>
 	<licenses>
-		<license/>
+		<license>
+			<name>Apache License, Version 2.0</name>
+			<url>https://www.apache.org/licenses/LICENSE-2.0</url>
+			<distribution>repo</distribution>
+		</license>
 	</licenses>
 	<developers>
-		<developer/>
+		<developer>
+			<id>doemefu</id>
+			<name>Dominic Furchert</name>
+			<email>domifur@hotmail</email>
+			<roles>
+				<role>Lead Developer</role>
+			</roles>
+		</developer>
 	</developers>
 	<scm>
-		<connection/>
-		<developerConnection/>
-		<tag/>
-		<url/>
+		<url>https://github.com/doemefu/user-management-service</url>
+		<connection>scm:git:git://github.com/doemefu/user-management-service.git</connection>
+		<developerConnection>scm:git:ssh://git@github.com:doemefu/user-management-service.git</developerConnection>
 	</scm>
+	<issueManagement>
+		<system>GitHub Issues</system>
+		<url>https://github.com/doemefu/user-management-service/issues</url>
+	</issueManagement>
 	<properties>
 		<java.version>21</java.version>
 		<logback.version>1.5.13</logback.version>
@@ -100,6 +114,8 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<configuration>
+					<source>21</source>
+					<target>21</target>
 					<annotationProcessorPaths>
 						<path>
 							<groupId>org.projectlombok</groupId>
