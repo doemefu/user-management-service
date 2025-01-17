@@ -13,17 +13,24 @@ Manages **user profiles**, **roles**, and **permissions**. This service is the c
 3. **User Activity Tracking**
     - Log user actions (e.g., login time, changes to user settings) for auditing (optional).
 4. **Password Reset & Change**
-    - **Best-Practice Suggestion**: Expose endpoints for handling password resets and changes, triggered by the Auth Service or the Frontend.
+    - Provide secure endpoints for password reset and change functionality.
+5. **API Endpoints**
+    - `/users`: Manage user profiles.
+    - `/users/{id}`: Operate on a specific user by ID.
+    - `/users/{id}/reset-password`: Reset a user's password securely.
 
 ---
 
-## Proposed Architecture
+## Architecture
 
 ### Textual Description
 - Runs as a **Spring Boot** microservice on **PostgreSQL**.
 - Stores user details: username, email, hashed passwords, roles, and optional activity logs.
 - Provides secure REST endpoints for user account management.
 
+---
+
+### Sequence Diagram
 ```plantuml
 @startuml
 
@@ -41,29 +48,34 @@ rectangle "Frontend" as FE
 
 FE -> UMS: [POST /users] Create new user
 FE -> UMS: [PUT /users/{id}] Update user
+FE -> UMS: [GET /users/{id}] Fetch user details
 FE -> UMS: [POST /users/{id}/reset-password] Reset password
 UMS -> AUTH: Optionally notify about changed user roles/permissions
 
 @enduml
 ```
 
-### Class diagram
+---
+
+### Class Diagram
 
 ```plantuml
 @startuml
 title User Management Service - Class Diagram
 
 class UserController {
-  + createUser(userDto: UserDto): ResponseEntity<UserDto>
-  + getUser(id: Long): ResponseEntity<UserDto>
-  + updateUser(id: Long, userDto: UserDto): ResponseEntity<UserDto>
+  + createUser(request: CreateUserRequest): ResponseEntity<UserResponse>
+  + getUser(id: Long): ResponseEntity<UserResponse>
+  + getAllUsers(): ResponseEntity<List<UserResponse>>
+  + updateUser(id: Long, userDto: UserDto): ResponseEntity<UserResponse>
   + deleteUser(id: Long): ResponseEntity<Void>
   + resetPassword(id: Long, newPassword: String): ResponseEntity<Void>
 }
 
 class UserService {
-  + createUser(userDto: UserDto): User
-  + findUserById(id: Long): User
+  + createUser(request: CreateUserRequest): User
+  + getUserById(id: Long): User
+  + getAllUsers(): List<User>
   + updateUser(id: Long, userDto: UserDto): User
   + deleteUser(id: Long): void
   + resetPassword(id: Long, newPassword: String): void
@@ -74,6 +86,8 @@ class UserRepository {
   + findById(id: Long): Optional<User>
   + findAll(): List<User>
   + delete(user: User): void
+  + existsByUsername(username: String): boolean
+  + existsByEmail(email: String): boolean
 }
 
 class User {
@@ -82,6 +96,10 @@ class User {
   + email: String
   + passwordHash: String
   + role: Role
+  + status: Status
+  + created: Date
+  + updated: Date
+  + lastLogin: Date
 }
 
 enum Role {
@@ -89,52 +107,41 @@ enum Role {
   ADMIN
 }
 
-class UserActivity {
-  + id: Long
-  + userId: Long
-  + activityType: String
-  + timestamp: Date
+enum Status {
+  ACTIVE
+  INACTIVE
+  BANNED
 }
 
 UserController --> UserService : Calls
 UserService --> UserRepository : Calls
-
 User --> Role
-UserService --> UserActivity : (Optional) to log activities
+User --> Status
 @enduml
 ```
 
-**Explanation**
+---
 
-- **UserController**: REST endpoints for creating, reading, updating, deleting users, and handling password resets.
-- **UserService**: Business logic for managing users, including interactions with the repository and optional activity logging.
-- **UserRepository**: Spring Data interface for database operations (e.g., PostgreSQL).
-- **User**: Entity representing a user record in the database.
-- **Role**: Simple enum for user roles.
-- **UserActivity** (Optional): Entity to log user-related events (logins, resets, etc.).
+## Database Schema
+- **Users Table**:
+    - `id` (Primary Key)
+    - `username` (Unique, Non-Nullable)
+    - `email` (Unique, Non-Nullable)
+    - `password_hash` (Non-Nullable)
+    - `role` (Enum: USER, ADMIN)
+    - `status` (Enum: ACTIVE, INACTIVE, BANNED)
+    - `created` (Timestamp)
+    - `updated` (Timestamp)
+    - `last_login` (Timestamp, Nullable)
 
 ---
 
-## Interfaces
-1. **Auth Service**
-    - **Type**: REST (internal)
-    - **Purpose**: Validating user credentials, notifying about role changes if needed.
-2. **Frontend**
-    - **Type**: REST
-    - **Purpose**: Creating/updating user profiles, resetting passwords, etc.
-
----
-
-## Database
-- **Primary DB**: PostgreSQL
-    - Table: `users` (username, email, password_hash, role, etc.)
-    - Table: `user_activity` (optional, for logging significant events).
-
----
-
-## Security & Maintenance
-- **Best-Practice Suggestion**: Use strong password policies and hashed (bcrypt, Argon2, etc.) storage.
-- **Best-Practice Suggestion**: Implement rate limiting on user creation/reset endpoints to prevent abuse.
+## Security
+- **Password Hashing**: Uses `PasswordEncoder` for secure password storage (e.g., BCrypt).
+- **Validation**:
+    - Ensures usernames and emails are unique.
+    - Validates email format and non-empty passwords.
+- **Access Control**: Roles (`USER`, `ADMIN`) define access permissions.
 
 ---
 
@@ -154,3 +161,15 @@ UserService --> UserActivity : (Optional) to log activities
 - **SCM Repository**: [GitHub - User Management Service](https://github.com/doemefu/user-management-service)
 - **License**: Apache License, Version 2.0 ([link](https://www.apache.org/licenses/LICENSE-2.0))
 - **Issues**: [GitHub Issues](https://github.com/doemefu/user-management-service/issues)
+
+---
+
+## Endpoints Summary
+- **POST /users**: Create a new user.
+- **GET /users/{id}**: Fetch details of a specific user.
+- **GET /users**: Fetch all users.
+- **PUT /users/{id}**: Update user information.
+- **DELETE /users/{id}**: Delete a user by ID.
+- **POST /users/{id}/reset-password**: Reset a user's password.
+
+---
