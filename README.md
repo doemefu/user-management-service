@@ -151,6 +151,7 @@ User --> Status
 - **Build Tool**: Maven
 - **Dependencies**:
     - Spring Boot Starters (Actuator, Data JPA, Security, Validation, Web, Mail)
+    - OAuth2 Resource Server
     - Lombok
     - PostgreSQL Driver
     - Micrometer (InfluxDB)
