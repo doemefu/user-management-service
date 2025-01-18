@@ -24,7 +24,13 @@ public class SecurityConfig {
         http
                 .csrf(AbstractHttpConfigurer::disable) // Disable CSRF protection
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/users/**").permitAll() // Adjust access as needed
+                        .requestMatchers(
+                                "/users/**",
+                                "/actuator/**",
+                                "/swagger-ui/**",
+                                "/api-docs/**",
+                                "/swagger-ui.html")
+                        .permitAll() // Adjust access as needed
                         .anyRequest().authenticated()
                 )
                 .httpBasic(Customizer.withDefaults());

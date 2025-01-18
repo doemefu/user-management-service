@@ -1,6 +1,6 @@
 
 # Stage 1: Build
-FROM eclipse-temurin:21-jdk-alpine as builder
+FROM eclipse-temurin:21-jdk-alpine AS builder
 LABEL authors="dfurchert"
 
 WORKDIR /workspace
