@@ -1,0 +1,43 @@
+### Get all users
+GET http://localhost:8081/users
+Accept: application/json
+
+###
+
+### Create a new user
+POST http://localhost:8081/users
+Content-Type: application/json
+
+{
+  "username": "testuser",
+  "email": "testuser@example.com",
+  "password": "password123",
+  "role": "USER"
+}
+
+###
+
+### Get a user by ID
+GET http://localhost:8081/users/1
+Accept: application/json
+
+###
+
+### Update a user
+PUT http://localhost:8081/users/1
+Content-Type: application/json
+
+{
+  "username": "updateduser",
+  "email": "updateduser@example.com",
+  "password": "newpassword123",
+  "role": "ADMIN"
+}
+
+###
+
+### Delete a user
+DELETE http://localhost:8081/users/1
+Accept: application/json
+
+###
